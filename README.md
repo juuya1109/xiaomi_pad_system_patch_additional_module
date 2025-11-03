@@ -2,7 +2,7 @@
 
 适用于小米平板的 **系统体验功能增强的 Magisk 模块**，提取 ROM 自动生成模块文件，提供部分系统体验增强功能。
 
-当前支持 **Android 14 和 Android 15** 的 Hyper OS For Pad。
+当前支持 **Android 14 、Android 15 和 Android 16** 的 Hyper OS For Pad。
 
 ---
 
@@ -41,7 +41,7 @@
 | ↕️ 强制上下分屏     | 实现竖屏上下分屏（仅 Android 15 支持） |
 | 🚫 禁用分屏黑名单   | 所有应用都可加入分屏                   |
 | 🔢 自定义小窗数量   | 普通桌面 / 工作台最多可设 8 个         |
-| 🧊 隐藏小窗小白条   | 隐藏或沉浸小窗下方导航条               |
+| 🧊 隐藏小窗小白条   | 隐藏或沉浸小窗下方导航条（仅 Android 15/14 支持）               |
 | 🎛️  窗口控制器 3.0  | 禁用任意应用的窗口顶栏三个点           |
 
 > ⚙️ 所有功能的开关均可在 Web UI【完美横屏应用计划 → 系统体验增强】中进行设置，窗口控制器位于【完美横屏应用计划 → 窗口控制器】
@@ -63,7 +63,7 @@
 
 ## 📱 当前支持系统版本
 
-✅ **已适配 Android 14 和 Android 15**，适用于小米平板各主流版本。
+✅ **已适配 Android 14 、 Android 15 和 Android 16**，适用于小米平板各主流版本。
 
 ---
 
@@ -214,4 +214,4 @@ product/etc/dot_black_list.json 0 0 0644
 - 基于 payload_extract 提取官方 ROM
 - Bash 自动生成模块结构
 - 支持 ext4 和 erofs 文件系统格式
-- Android 14 和 Android 15 均已适配
+- Android 14 、 Android 15 和 Android 16 均已适配

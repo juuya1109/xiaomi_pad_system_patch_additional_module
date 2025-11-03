@@ -248,7 +248,7 @@ patch_A14_DisableFreeformBottomCaption() {
     echo '修补隐藏自由窗口小白条完成'
 }
 
-patch_DisableFreeformBottomCaption() {
+patch_A15_DisableFreeformBottomCaption() {
 
     local MiuiBottomDecorationSmali=$(find $workfile/MiuiSystemUI/smali/*/com/android/wm/shell/multitasking/miuimultiwinswitch/miuiwindowdecor -type f -iname "MiuiBottomDecoration.smali")
     if [ -z "$MiuiBottomDecorationSmali" ]; then
@@ -267,14 +267,44 @@ patch_DisableFreeformBottomCaption() {
     # 删除原方法
     sed -i "${createBottomCaption_start_line},${actual_createBottomCaption_end_line}d" $MiuiBottomDecorationSmali
     # 插入Patch后的方法
-    sed -i "$((createBottomCaption_start_line - 1))r $workfile/createBottomCaption.smali" $MiuiBottomDecorationSmali
+    sed -i "$((createBottomCaption_start_line - 1))r $workfile/$android_target_version/createBottomCaption.smali" $MiuiBottomDecorationSmali
+
+    echo '修补隐藏自由窗口小白条完成'
+}
+
+patch_DisableFreeformBottomCaption() {
+
+    local MiuiBottomDecorationSmali=$(find $workfile/MiuiSystemUI/smali/*/com/android/wm/shell/multitasking/miuimultiwinswitch/miuiwindowdecor/decoration -type f -iname "MiuiDecorationBottomViewHost.smali")
+    if [ -z "$MiuiBottomDecorationSmali" ]; then
+      echo "❌ 未找到 MiuiBottomDecoration.smali"
+      exit 1
+    fi
+    # 查找createBottomCaption_start_line
+    local createBottomCaption_start_line=$(grep -n -m 1 ".method public createBottomCaption()Lcom/android/wm/shell/multitasking/miuimultiwinswitch/miuiwindowdecor/decoration/MiuiDecorationBottomView;" "$MiuiBottomDecorationSmali" | cut -d: -f1)
+    echo "createBottomCaption_start_line=$createBottomCaption_start_line"
+    # 从createBottomCaption_start_line开始查找第一个.end method行号
+    local createBottomCaption_end_line=$(tail -n +"$createBottomCaption_start_line" $MiuiBottomDecorationSmali | grep -n -m 1 "invoke-virtual {p0}, Lcom/android/wm/shell/multitasking/miuimultiwinswitch/miuiwindowdecor/decoration/MiuiDecorationBottomViewHost;->getSurfaceHeight()F" | cut -d: -f1)
+    echo "createBottomCaption_end_line=$createBottomCaption_end_line"
+    # 计算.end method的行号
+    local actual_createBottomCaption_end_line=$((createBottomCaption_start_line + createBottomCaption_end_line - 1))
+    echo "actual_createBottomCaption_end_line=$actual_createBottomCaption_end_line"
+    # 删除原方法
+    sed -i "${createBottomCaption_start_line},${actual_createBottomCaption_end_line}d" $MiuiBottomDecorationSmali
+    # 插入Patch后的方法
+    sed -i "$((createBottomCaption_start_line - 1))r $workfile/$android_target_version/createBottomCaption.smali" $MiuiBottomDecorationSmali
 
     echo '修补隐藏自由窗口小白条完成'
 }
 
 patch_DisableFreeformBottomCaptionEntry() {
-  if [ "$android_target_version" -ge 15 ]; then
+    # 如果系统版本 >= 16，跳过 patch
+  if [ "$android_target_version" -ge 16 ]; then
+    return 0
+  fi
+  if [ "$android_target_version" -ge 16 ]; then
     patch_DisableFreeformBottomCaption
+  elif [ "$android_target_version" -eq 15 ]; then
+    patch_A15_DisableFreeformBottomCaption
   elif [ "$android_target_version" -eq 14 ]; then
     patch_A14_DisableFreeformBottomCaption
   else
@@ -284,33 +314,6 @@ patch_DisableFreeformBottomCaptionEntry() {
 }
 
 
-### 沉浸自由窗口小白条
-patch_A14_ImmerseFreeformBottomCaption() {
-
-    local MiuiBaseWindowDecorationSmali=$(find $workfile/MiuiSystemUI/smali/*/com/android/wm/shell/miuimultiwinswitch/miuiwindowdecor -type f -iname "MiuiBaseWindowDecoration.smali")
-
-    if [ -z "$MiuiBaseWindowDecorationSmali" ]; then
-      echo "❌ 未找到 MiuiBaseWindowDecoration.smali"
-      exit 1
-    fi
-    
-    # 查找inBottomCaptionInsetsBlackList_start_line
-    local inBottomCaptionInsetsBlackList_start_line=$(grep -n -m 1 ".method private inBottomCaptionInsetsBlackList()Z" "$MiuiBaseWindowDecorationSmali" | cut -d: -f1)
-    echo "inBottomCaptionInsetsBlackList_start_line=$inBottomCaptionInsetsBlackList_start_line"
-    # 从createBottomCaption_start_line开始查找第一个.end method行号
-    local inBottomCaptionInsetsBlackList_end_line=$(tail -n +"$inBottomCaptionInsetsBlackList_start_line" $MiuiBaseWindowDecorationSmali | grep -n -m 1 ".end method" | cut -d: -f1)
-    echo "inBottomCaptionInsetsBlackList_end_line=$inBottomCaptionInsetsBlackList_end_line"
-    # 计算.end method的行号
-    local actual_inBottomCaptionInsetsBlackList_end_line=$((inBottomCaptionInsetsBlackList_start_line + inBottomCaptionInsetsBlackList_end_line - 1))
-    echo "actual_inBottomCaptionInsetsBlackList_end_line=$actual_inBottomCaptionInsetsBlackList_end_line"
-    # 删除原方法
-    sed -i "${inBottomCaptionInsetsBlackList_start_line},${actual_inBottomCaptionInsetsBlackList_end_line}d" $MiuiBaseWindowDecorationSmali
-    # 插入Patch后的方法
-    sed -i "$((inBottomCaptionInsetsBlackList_start_line - 1))r $workfile/$android_target_version/inBottomCaptionInsetsBlackList.smali" $MiuiBaseWindowDecorationSmali
-
-    echo '修补沉浸自由窗口小白条完成'
-}
-
 ### 自定义窗口控制器黑名单(A14)
 patch_A14_CustomDotBlackList() {
 
@@ -319,7 +322,7 @@ patch_A14_CustomDotBlackList() {
     # 查找getDotBlackList_start_line
     local getDotBlackList_start_line=$(grep -n -m 1 ".method public getDotBlackList()Ljava/util/Set;" "$MiuiMultiWinSwitchConfigSmali" | cut -d: -f1)
     echo "getDotBlackList_start_line=$getDotBlackList_start_line"
-    # 从createBottomCaption_start_line开始查找第一个.end method行号
+    # 从getDotBlackList_start_line开始查找第一个.end method行号
     local getDotBlackList_end_line=$(tail -n +"$getDotBlackList_start_line" $MiuiMultiWinSwitchConfigSmali | grep -n -m 1 ".end method" | cut -d: -f1)
     echo "getDotBlackList_end_line=$getDotBlackList_end_line"
     # 计算.end method的行号
